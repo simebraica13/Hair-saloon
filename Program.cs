@@ -1,23 +1,49 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.EntityFrameworkCore;
+using Hair_saloon.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Configuration;
+using Microsoft.AspNetCore.Authentication;
 
-// Add services to the container.
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("HairSaloonConnectionString") ?? throw new InvalidOperationException("Connection string 'TasksUsersContextConnection' not found.");
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+
+builder.Services.AddCors(options => {
+    options.AddPolicy(MyAllowSpecificOrigins,
+                          policy => {
+                              policy.WithOrigins("http://localhost:5173")
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod();
+                          });
+});
+
+
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddDbContext<HairSaloonContext>();
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.MapControllers();
 
