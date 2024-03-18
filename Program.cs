@@ -3,6 +3,10 @@ using Hair_saloon.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Configuration;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Hair_saloon.Data;
 
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -11,6 +15,17 @@ var connectionString = builder.Configuration.GetConnectionString("HairSaloonConn
 
 builder.Services.AddControllers();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = new TokenValidationParameters {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
 
 builder.Services.AddCors(options => {
     options.AddPolicy(MyAllowSpecificOrigins,
@@ -37,7 +52,7 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseAuthentication();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
