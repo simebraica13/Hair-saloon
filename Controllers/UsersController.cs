@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hair_saloon.Models;
+using Microsoft.AspNetCore.Authorization;
+using Hair_saloon.Data;
 
 namespace Hair_saloon.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -21,6 +24,7 @@ namespace Hair_saloon.Controllers
         }
 
         // GET: api/Users
+        //[Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
@@ -28,6 +32,7 @@ namespace Hair_saloon.Controllers
         }
 
         // GET: api/Users/5
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
@@ -104,4 +109,5 @@ namespace Hair_saloon.Controllers
             return _context.Users.Any(e => e.UserId == id);
         }
     }
+    
 }

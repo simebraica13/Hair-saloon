@@ -5,7 +5,7 @@ namespace Hair_saloon.Models;
 
 public partial class TypeOfUser
 {
-    public int Id { get; set; }
+    public int IdTypeOfUser { get; set; }
 
     public string RoleOfUser { get; set; } = null!;
 

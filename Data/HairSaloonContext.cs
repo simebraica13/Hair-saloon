@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Hair_saloon.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hair_saloon.Models;
+namespace Hair_saloon.Data;
 
 public partial class HairSaloonContext : DbContext
 {
@@ -22,7 +23,7 @@ public partial class HairSaloonContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Server=LAPTOP-GGB50FF3\\SQLEXPRESS;Initial Catalog=HairSaloon;Integrated Security=True;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False;Database=HairSaloon;Trusted_Connection=True;");
+        => optionsBuilder.UseSqlServer("Server=LAPTOP-GGB50FF3\\SQLEXPRESS; Initial Catalog=HairSaloon;Integrated Security=True;Connect Timeout=30; Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite; Multi Subnet Failover=False;Database=HairSaloon;Trusted_Connection=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,11 +47,11 @@ public partial class HairSaloonContext : DbContext
 
         modelBuilder.Entity<TypeOfUser>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Type_Of___3213E83F7FBD87CA");
+            entity.HasKey(e => e.IdTypeOfUser).HasName("PK__Type_Of___3213E83F7FBD87CA");
 
             entity.ToTable("Type_Of_User");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.IdTypeOfUser).HasColumnName("id_type_of_user");
             entity.Property(e => e.Description)
                 .HasMaxLength(300)
                 .IsUnicode(false)
@@ -79,7 +80,7 @@ public partial class HairSaloonContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("last_name");
             entity.Property(e => e.Password)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("password");
             entity.Property(e => e.TypeOfUserId).HasColumnName("type_of_user_id");
