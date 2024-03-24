@@ -28,7 +28,6 @@ namespace Hair_saloon.Controllers {
         private async Task<UserLoginDto> AuthenticateUser(UserLoginDto user) {
             UserLoginDto _user = null;
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
-            //var typeOfUser = await _context.Users.FirstOrDefaultAsync(u => u.TypeOfUserId == 1)
             if (existingUser != null && BCrypt.Net.BCrypt.Verify(user.Password, existingUser.Password)) {
                 _user = new UserLoginDto { Username = existingUser.Username };
             }
@@ -62,8 +61,16 @@ namespace Hair_saloon.Controllers {
             TimeZoneInfo croatiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
             DateTime expiresLocalTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, croatiaTimeZone).AddMinutes(1);
 
+            string username = user.Username;
+            string id =  GetUserIdAsync(username);
+            string type_of_user_id =  GetTypeOfUserAsync(username);
+
+
             var jwt_description = new SecurityTokenDescriptor {
-                Subject = new ClaimsIdentity(new[] {new Claim("username", user.Username)}),
+                Subject = new ClaimsIdentity(new[] {new Claim("username", username),
+                                                    new Claim("id", id),
+                                                    new Claim("type_of_user_id", type_of_user_id)
+                                                   }),
                 Expires = expiresLocalTime,
                 Audience = audience,
                 Issuer = issuer,
@@ -84,6 +91,17 @@ namespace Hair_saloon.Controllers {
 
             var response = new { token = encryptedToken, username = user.Username };
             return JsonSerializer.Serialize(response);
+        }
+
+
+        private string GetUserIdAsync(string username) {
+            var user =  _context.Users.FirstOrDefault(u => u.Username == username);
+            return user?.UserId.ToString();
+        }
+
+        private string GetTypeOfUserAsync(string username) {
+            var user =  _context.Users.FirstOrDefault(u => u.Username == username);
+            return user.TypeOfUserId.ToString();
         }
 
         [HttpPost("logout")]
