@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 
 namespace Hair_saloon.Controllers {
@@ -26,13 +28,12 @@ namespace Hair_saloon.Controllers {
         private async Task<UserLoginDto> AuthenticateUser(UserLoginDto user) {
             UserLoginDto _user = null;
             var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == user.Username);
-
+            //var typeOfUser = await _context.Users.FirstOrDefaultAsync(u => u.TypeOfUserId == 1)
             if (existingUser != null && BCrypt.Net.BCrypt.Verify(user.Password, existingUser.Password)) {
                 _user = new UserLoginDto { Username = existingUser.Username };
             }
             return _user;
         }
-
 
         private async Task<User> CreateUser(User user) {
             User _user = null;
@@ -40,6 +41,7 @@ namespace Hair_saloon.Controllers {
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
             if (existingUser == null) {
                 _user = new User {
+                    TypeOfUserId = 1,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     Username = user.Username,
@@ -52,23 +54,36 @@ namespace Hair_saloon.Controllers {
             return _user;
         }
 
-
-
-
         private string GenerateJWT(UserLoginDto user) {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var audience = _config["Jwt:Audience"];
+            var issuer = _config["Jwt:Issuer"];
+            TimeZoneInfo croatiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+            DateTime expiresLocalTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, croatiaTimeZone).AddMinutes(10);
 
-            var token = new JwtSecurityToken(
-                _config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
-                new Claim[] {
-                     new Claim("username", user.Username), 
-                },
-                expires: DateTime.Now.AddMinutes(1),
-                signingCredentials: credentials);
+            var jwt_description = new SecurityTokenDescriptor {
+                Subject = new ClaimsIdentity(new[] {new Claim("username", user.Username)}),
+                Expires = expiresLocalTime,
+                Audience = audience,
+                Issuer = issuer,
+                SigningCredentials = credentials
+            };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = new JwtSecurityTokenHandler().CreateToken(jwt_description);
+            var encryptedToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+            HttpContext.Response.Cookies.Append("token", encryptedToken,
+                new CookieOptions {
+                    Expires = expiresLocalTime,
+                    HttpOnly = true,
+                    Secure = true,
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+                });
+
+            var response = new { token = encryptedToken, username = user.Username };
+            return JsonSerializer.Serialize(response);
         }
 
 
@@ -78,8 +93,8 @@ namespace Hair_saloon.Controllers {
             IActionResult response = Unauthorized();
             var _user = await AuthenticateUser(user); 
             if (_user != null) {
-                var token = GenerateJWT(_user);
-                response = Ok(new { token = token });
+                var one = GenerateJWT(_user);
+                response = Ok();
             }
             return response;
         }

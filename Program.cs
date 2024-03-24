@@ -16,6 +16,7 @@ var connectionString = builder.Configuration.GetConnectionString("HairSaloonConn
 builder.Services.AddControllers();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddCookie(options => options.Cookie.Name = "token")
     .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters {
             ValidateIssuer = true,
@@ -24,6 +25,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+        options.Events = new JwtBearerEvents {
+            OnMessageReceived = context => {
+                context.Token = context.Request.Cookies["token"];
+                return Task.CompletedTask;
+            }
         };
     });
 

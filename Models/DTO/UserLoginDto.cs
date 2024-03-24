@@ -8,4 +8,5 @@ public class UserLoginDto {
 
     public string Password { get; set; } = null!;
 
+    //public int? TypeOfUserId { get; set; } = 0;
 }
