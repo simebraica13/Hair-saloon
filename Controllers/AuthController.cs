@@ -60,7 +60,7 @@ namespace Hair_saloon.Controllers {
             var audience = _config["Jwt:Audience"];
             var issuer = _config["Jwt:Issuer"];
             TimeZoneInfo croatiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
-            DateTime expiresLocalTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, croatiaTimeZone).AddMinutes(10);
+            DateTime expiresLocalTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, croatiaTimeZone).AddMinutes(1);
 
             var jwt_description = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new[] {new Claim("username", user.Username)}),
@@ -84,6 +84,13 @@ namespace Hair_saloon.Controllers {
 
             var response = new { token = encryptedToken, username = user.Username };
             return JsonSerializer.Serialize(response);
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout() {
+            HttpContext.Response.Cookies.Delete("token");
+            var response = Ok();
+            return response;
         }
 
 
