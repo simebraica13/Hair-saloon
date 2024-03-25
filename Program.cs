@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("HairSaloonConnectionString") ?? throw new InvalidOperationException("Connection string 'TasksUsersContextConnection' not found.");
 
 builder.Services.AddControllers();
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddCookie(options => options.Cookie.Name = "token")
     .AddJwtBearer(options => {
@@ -33,6 +33,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
 
 builder.Services.AddCors(options => {
     options.AddPolicy(MyAllowSpecificOrigins,
