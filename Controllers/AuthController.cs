@@ -50,7 +50,6 @@ namespace Hair_saloon.Controllers {
             IActionResult response = Unauthorized();
             var _user = await _loginService.AuthenticateUser(user); 
             if (_user != null) {
-                //ODE GRESKA
                 var token = _jwt.GenerateJWT(_user);
                 response = Ok();
             }

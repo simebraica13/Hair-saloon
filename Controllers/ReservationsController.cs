@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Hair_saloon.Data;
 using Hair_saloon.Models;
+using Hair_saloon.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hair_saloon.Controllers
 {
@@ -15,13 +17,17 @@ namespace Hair_saloon.Controllers
     public class ReservationsController : ControllerBase
     {
         private readonly HairSaloonContext _context;
-
-        public ReservationsController(HairSaloonContext context)
+        private readonly Jwt _jwt;
+        private IConfiguration _config;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public ReservationsController(IConfiguration configuration, HairSaloonContext context, IHttpContextAccessor httpContextAccessor)
         {
+            _jwt = new Jwt(_config, _httpContextAccessor, _context);
             _context = context;
         }
 
         // GET: api/Reservations
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Reservation>>> GetReservations()
         {

@@ -1,4 +1,5 @@
-﻿using Hair_saloon.Data;
+﻿using Azure.Core;
+using Hair_saloon.Data;
 using Hair_saloon.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -71,5 +72,18 @@ namespace Hair_saloon.Tokens {
             var user = _context.Users.FirstOrDefault(u => u.Username == username);
             return user.TypeOfUserId.ToString();
         }
+
+        /*
+        public string DecodeToken() {
+            var decodedToken1 = _httpContextAccessor.HttpContext.Request.Headers.Cookie;
+            string decodedToken = decodedToken1.ToString();
+            if (decodedToken == null) {
+                // " the case where HttpContext is null
+                return "ovo je cudno";
+            } else {
+                return decodedToken;
+            }
+        }
+        */
     }
 }
